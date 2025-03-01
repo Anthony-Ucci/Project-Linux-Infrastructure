@@ -1,0 +1,42 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Mettre à jour le cache apt pour Ubuntu
+      apt:
+        update_cache: yes
+      when: target_os == "ubuntu"
+
+    - name: Installer Apache sur Ubuntu
+      apt:
+        name: apache2
+        state: present
+      when: target_os == "ubuntu"
+
+    - name: Mettre à jour le cache dnf pour CentOS
+      dnf:
+        update_cache: yes
+        use_backend: dnf4
+      when: target_os == "centos"
+
+    - name: Installer HTTPD sur CentOS
+      dnf:
+        name: httpd
+        state: present
+        use_backend: dnf4
+      when: target_os == "centos"
+
+    - name: Activer et démarrer Apache sur Ubuntu
+      systemd:
+        name: apache2
+        enabled: yes
+        state: started
+      when: target_os == "ubuntu"
+
+    - name: Activer et démarrer HTTPD sur CentOS
+      systemd:
+        name: httpd
+        enabled: yes
+        state: started
+      when: target_os == "centos"
+

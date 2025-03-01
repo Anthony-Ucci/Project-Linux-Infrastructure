@@ -1,0 +1,55 @@
+Vagrant.configure("2") do |config|
+
+  # Méthode pour configurer VirtualBox pour une machine donnée
+  def configure_virtualbox(machine, name, memory, cpus)
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name   = name
+      vb.memory = memory
+      vb.cpus   = cpus
+    end
+  end
+
+  # Méthode pour configurer libvirt (KVM) pour une machine donnée
+  def configure_libvirt(machine, name, memory, cpus)
+    machine.vm.provider "libvirt" do |lv|
+      lv.name   = name
+      lv.memory = memory
+      lv.cpus   = cpus
+    end
+  end
+
+  # Configuration pour la VM Ubuntu
+  config.vm.define "ubuntu-vm" do |ubuntu|
+    ubuntu.vm.box = "ubuntu/bionic64"         # Box Ubuntu 18.04
+    ubuntu.vm.hostname = "ubuntu-vm"
+    ubuntu.vm.network "private_network", ip: "192.168.56.10"
+    
+    ubuntu.vm.provision "ansible" do |ansible|
+      ansible.playbook   = "playbook.yml"
+      ansible.extra_vars = { target_os: "ubuntu" }
+      ansible.groups     = { "ubuntu_servers" => ["ubuntu-vm"] }
+    end
+
+    # Appliquer la configuration spécifique pour chaque provider
+    configure_virtualbox(ubuntu, "Ubuntu_VM_VBox", "2048", 2)
+    configure_libvirt(ubuntu, "Ubuntu_VM_KVM", "2048", 2)
+  end
+
+  # Configuration pour la VM CentOS
+  config.vm.define "centos-vm" do |centos|
+    centos.vm.box = "centos/7"                 # Box CentOS 7
+    centos.vm.hostname = "centos-vm"
+    centos.vm.network "private_network", ip: "192.168.56.11"
+    
+    centos.vm.provision "ansible" do |ansible|
+      ansible.playbook   = "playbook.yml"
+      ansible.extra_vars = { target_os: "centos" }
+      ansible.groups     = { "centos_servers" => ["centos-vm"] }
+    end
+
+    # Appliquer la configuration spécifique pour chaque provider
+    configure_virtualbox(centos, "CentOS_VM_VBox", "4096", 4)
+    configure_libvirt(centos, "CentOS_VM_KVM", "4096", 4)
+  end
+
+end
