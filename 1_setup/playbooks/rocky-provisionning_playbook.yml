@@ -2,6 +2,20 @@
 - hosts: all
   become: true
   tasks:
+    - name: Find all .repo files in /etc/yum.repos.d/
+      ansible.builtin.find:
+        paths: /etc/yum.repos.d/
+        patterns: "*.repo"
+      register: repo_files
+
+    - name: Replace 'http://' by 'https://' in all .repo files
+      ansible.builtin.replace:
+        path: "{{ item.path }}"
+        regexp: 'http://'
+        replace: 'https://'
+        backup: yes
+      loop: "{{ repo_files.files }}"
+
     - name: Update dnf cache
       dnf:
         update_cache: yes
@@ -24,23 +38,3 @@
         path: /etc/machine-id
         state: touch
         mode: '0644'
-
-    - name: Delete persistent net rules file
-      file:
-        path: /etc/udev/rules.d/70-persistent-net.rules
-        state: absent
-
-    - name: Shutdown the machine
-      command: /sbin/shutdown -h now
-      async: 0
-      poll: 0
-      ignore_errors: true
-      failed_when: false
-
-    - name: Wait for machine to shut down (SSH port closed)
-      delegate_to: localhost
-      wait_for:
-        host: "{{ ansible_ssh_host | default(inventory_hostname) }}"
-        port: 22
-        state: stopped
-        timeout: 120

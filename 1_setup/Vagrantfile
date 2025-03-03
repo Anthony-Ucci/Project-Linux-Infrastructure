@@ -21,10 +21,10 @@ Vagrant.configure("2") do |config|
 
 
   # DEBIAN 12
-  config.vm.define "debian-vm" do |debian|
+  config.vm.define "0-debian" do |debian|
     debian.vm.box = "generic/debian12"
     debian.vm.box_version = "4.3.12"
-    debian.vm.hostname = "debian-vm"
+    debian.vm.hostname = "0-debian"
     debian.vm.network "private_network", ip: "192.168.56.12"
     
     debian.vm.provision "ansible" do |ansible|
@@ -33,18 +33,17 @@ Vagrant.configure("2") do |config|
       ansible.groups     = { "debian_servers" => ["debian-vm"] }
     end
 
-    # Appliquer la configuration spécifique pour chaque provider
-    configure_virtualbox(debian, "Debian_VM_VBox", "2048", 2)
-    configure_libvirt(debian, "Debian_VM_KVM", "2048", 2)
+    configure_virtualbox(debian, "0-debian", "2048", 2)
+    configure_libvirt(debian, "0-debian", "2048", 2)
   end
 
 
 
   # UBUNTU 24
-  config.vm.define "ubuntu-vm" do |ubuntu|
+  config.vm.define "0-ubuntu" do |ubuntu|
     ubuntu.vm.box = "bento/ubuntu-24.04"
     ubuntu.vm.box_version = "202502.21.0"
-    ubuntu.vm.hostname = "ubuntu-vm"
+    ubuntu.vm.hostname = "0-ubuntu"
     ubuntu.vm.network "private_network", ip: "192.168.56.10"
     
     ubuntu.vm.provision "ansible" do |ansible|
@@ -53,18 +52,17 @@ Vagrant.configure("2") do |config|
       ansible.groups     = { "ubuntu_servers" => ["ubuntu-vm"] }
     end
 
-    # Appliquer la configuration spécifique pour chaque provider
-    configure_virtualbox(ubuntu, "Ubuntu_VM_VBox", "2048", 2)
-    configure_libvirt(ubuntu, "Ubuntu_VM_KVM", "2048", 2)
+    configure_virtualbox(ubuntu, "0-ubuntu", "2048", 2)
+    configure_libvirt(ubuntu, "0-ubuntu", "2048", 2)
   end
 
 
 
   # ROCKY 9
-  config.vm.define "rocky-vm" do |rocky|
+  config.vm.define "0-rocky" do |rocky|
     rocky.vm.box = "bento/rockylinux-9"
     rocky.vm.box_version = "202502.21.0"
-    rocky.vm.hostname = "rocky-vm"
+    rocky.vm.hostname = "0-rocky"
     rocky.vm.network "private_network", ip: "192.168.56.13"
     
     rocky.vm.provision "ansible" do |ansible|
@@ -73,9 +71,8 @@ Vagrant.configure("2") do |config|
       ansible.groups     = { "rocky_servers" => ["rocky-vm"] }
     end
 
-    # Appliquer la configuration spécifique pour chaque provider
-    configure_virtualbox(rocky, "Rocky_VM_VBox", "4096", 4)
-    configure_libvirt(rocky, "Rocky_VM_KVM", "4096", 4)
+    configure_virtualbox(rocky, "0-rocky", "2048", 2)
+    configure_libvirt(rocky, "0-rocky", "2048", 2)
   end
 
 end

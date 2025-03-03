@@ -2,6 +2,12 @@
 - hosts: all
   become: true
   tasks:
+    - name: Modify /etc/apt/sources.list file
+      ansible.builtin.replace:
+        path: /etc/apt/sources.list
+        regexp: 'http://'
+        replace: 'https://'
+        backup: yes
     - name: Update apt cache
       apt:
         update_cache: yes
@@ -29,23 +35,3 @@
         path: /etc/machine-id
         state: touch
         mode: '0644'
-
-    - name: Delete persistent net rules file
-      file:
-        path: /etc/udev/rules.d/70-persistent-net.rules
-        state: absent
-        
-    - name: Shutdown the machine
-      command: /sbin/shutdown -h now
-      async: 0
-      poll: 0
-      ignore_errors: true
-      failed_when: false
-
-    - name: Wait for machine to shut down (SSH port closed)
-      delegate_to: localhost
-      wait_for:
-        host: "{{ ansible_ssh_host | default(inventory_hostname) }}"
-        port: 22
-        state: stopped
-        timeout: 120
