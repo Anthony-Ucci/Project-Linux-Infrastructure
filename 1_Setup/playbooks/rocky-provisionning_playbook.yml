@@ -38,3 +38,25 @@
         path: /etc/machine-id
         state: touch
         mode: '0644'
+
+    - name: Create user tux with password rootroot
+      user:
+        name: tux
+        password: "{{ 'rootroot' | password_hash('sha512') }}"
+        shell: /bin/bash
+        state: present
+
+    - name: Allow user tux to sudo without password
+      copy:
+        dest: /etc/sudoers.d/tux
+        content: "tux ALL=(ALL) NOPASSWD: ALL\n"
+        owner: root
+        group: root
+        mode: '0440'
+
+    - name: Configure keyboard layout
+      ansible.builtin.command: localectl set-keymap be
+
+    - name: Configure timezone to Europe/Brussels
+      ansible.builtin.command: timedatectl set-timezone Europe/Brussels
+

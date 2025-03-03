@@ -1,15 +1,14 @@
 Vagrant.configure("2") do |config|
 
-  # Méthode pour configurer VirtualBox pour une machine donnée
   def configure_virtualbox(machine, name, memory, cpus)
     machine.vm.provider "virtualbox" do |vb|
       vb.name   = name
       vb.memory = memory
       vb.cpus   = cpus
+      vb.gui    = false
     end
   end
 
-  # Méthode pour configurer libvirt (KVM) pour une machine donnée
   def configure_libvirt(machine, name, memory, cpus)
     machine.vm.provider "libvirt" do |lv|
       lv.name   = name
@@ -25,7 +24,6 @@ Vagrant.configure("2") do |config|
     debian.vm.box = "generic/debian12"
     debian.vm.box_version = "4.3.12"
     debian.vm.hostname = "0-debian"
-    debian.vm.network "private_network", ip: "192.168.56.12"
     
     debian.vm.provision "ansible" do |ansible|
       ansible.playbook   = "./playbooks/debian-provisionning_playbook.yml"
@@ -44,7 +42,6 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.box = "bento/ubuntu-24.04"
     ubuntu.vm.box_version = "202502.21.0"
     ubuntu.vm.hostname = "0-ubuntu"
-    ubuntu.vm.network "private_network", ip: "192.168.56.10"
     
     ubuntu.vm.provision "ansible" do |ansible|
       ansible.playbook   = "./playbooks/ubuntu-provisionning_playbook.yml"
@@ -63,7 +60,6 @@ Vagrant.configure("2") do |config|
     rocky.vm.box = "bento/rockylinux-9"
     rocky.vm.box_version = "202502.21.0"
     rocky.vm.hostname = "0-rocky"
-    rocky.vm.network "private_network", ip: "192.168.56.13"
     
     rocky.vm.provision "ansible" do |ansible|
       ansible.playbook   = "./playbooks/rocky-provisionning_playbook.yml"
