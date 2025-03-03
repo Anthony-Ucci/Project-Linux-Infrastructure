@@ -1,3 +1,4 @@
 1_setup/.vagrant
 1_setup/vagrant-boxes/
 1_setup/playbooks/machine_ids/
+.vscode/
