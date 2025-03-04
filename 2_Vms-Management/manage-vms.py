@@ -24,7 +24,7 @@ def clone_vm(vm, distro, ram):
     start_vm(vm)
 
 def start_vm(vm):
-    cmd = ["VBoxManage", "startvm", vm]
+    cmd = ["VBoxManage", "startvm", vm, "--type", "headless"]
     subprocess.run(cmd)
 
 def shutdown_vm(vm):
