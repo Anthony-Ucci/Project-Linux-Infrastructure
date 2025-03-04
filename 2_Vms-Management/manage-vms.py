@@ -28,12 +28,11 @@ def start_vm(vm):
     subprocess.run(cmd)
 
 def shutdown_vm(vm):
-    cmd = ["VBoxManage", "controlvm", vm, "acpipowerbutton"]
+    cmd = ["VBoxManage", "controlvm", vm, "poweroff"]
     subprocess.run(cmd)
 
 def undefine_vm(vm):
-    cmd = ["VBoxManage", "controlvm", vm, "poweroff"]
-    subprocess.run(cmd)
+    shutdown_vm(vm)
     time.sleep(5)
     cmd = ["VBoxManage", "unregistervm", vm, "--delete"]
     subprocess.run(cmd)

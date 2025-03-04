@@ -26,18 +26,21 @@ def ensure_nat_network(vm, netname, network_range, nic_number):
         sys.exit(1)
 
     server_ip = str(all_hosts[0])    # ex: "172.16.21.1"
-    lower_ip  = str(all_hosts[1])    # ex: "172.16.21.2"
+    lower_ip  = str(all_hosts[4])    # ex: "172.16.21.5"
     upper_ip  = str(all_hosts[-1])   # ex: "172.16.21.254"
 
     result = subprocess.run(["VBoxManage", "natnetwork", "list"], stdout=subprocess.PIPE, text=True)
     if netname not in result.stdout:
         print(f"NAT network '{netname}' doesn't exist. Creating...")
     else:
-        print(f"NAT network '{netname}' already exists.")
+        print(f"NAT network '{netname}' already exists. Recreating...")
+        subprocess.run(["VBoxManage", "natnetwork", "stop", "--netname", netname])
+        subprocess.run(["VBoxManage", "natnetwork", "remove", "--netname", netname])
 
-    subprocess.run(["VBoxManage", "natnetwork", "remove", "--netname", netname])
     subprocess.run(["VBoxManage", "natnetwork", "add", "--netname", netname, "--network", network_range, "--enable", "--dhcp", "on"])
-    subprocess.run(["VBoxManage", "dhcpserver", "modify", "--network", netname, "--server-ip", server_ip, "--netmask", netmask, "--lower-ip", lower_ip, "--upper-ip", upper_ip])
+    subprocess.run(["VBoxManage", "natnetwork", "start", "--netname", netname])
+    subprocess.run(["VBoxManage", "dhcpserver", "modify", "--network", netname, "--server-ip", server_ip, "--netmask", netmask, "--lower-ip", lower_ip, "--upper-ip", upper_ip, "--enable"])
+    
     subprocess.run(["VBoxManage", "modifyvm", vm, f"--nic{nic_number}", "natnetwork", f"--nat-network{nic_number}", netname])
 
 
