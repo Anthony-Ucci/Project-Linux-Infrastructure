@@ -5,6 +5,9 @@ import subprocess
 from scripts import switchHypervisor, checkCommands
 from scripts.virtualbox import manageVms, setInterfaces, setupGateway
 
+vms_management_config_file =  "./conf/vbox_manager.conf"
+neti_management_config_file =  "./conf/vbox_net.conf"
+
 def check_command(cmd):
     """Check if a command is available in the system."""
     try:
@@ -32,7 +35,8 @@ def main():
 
 
     print("--- 2 --- Switching hypervisor provider...")
-    switchHypervisor.switch_provider(hypervisor)
+    ### TODO Check the hypervisor command
+    switchHypervisor.switch_to_virtualbox()
 
 
     print("--- 3 --- Creating VMs (Vagrant + Ansible)...")
@@ -41,16 +45,17 @@ def main():
     subprocess.run(["vagrant", "halt"], cwd=vagrant_dir, check=True)
 
 
-    # 4) Setting up VMs (Cloning)
-    # Assuming you have different functions based on the hypervisor in manage_vms
-    vm_scripts_dir = os.path.join(os.getcwd(), "scripts", hypervisor)
-    # If you prefer to use the same module, you might pass the directory as a parameter.
-    manage_vms.clone_vms(vm_scripts_dir)
-    manage_vms.shutdown_vms(vm_scripts_dir)
+    print("--- 4 --- Setting up VMs (Cloning)...")
+    manageVms.process(vms_management_config_file, "clone")
+    manageVms.process(vms_management_config_file, "shutdown")
 
 
-    # 5) Setting network interfaces on VMs
-    set_interfaces.configure_interfaces()
+    print("--- 5 --- Setting network interfaces on VMs...")
+    setInterfaces.process(neti_management_config_file)
+
+
+    print("--- 6 --- Configuring the gateway...")
+    
 
     print("All tasks completed successfully.")
 

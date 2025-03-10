@@ -1,20 +1,21 @@
+---
 - name: Ensure sshpass is installed on control machine
   hosts: localhost
   connection: local
-  become: yes
+  become: true
   tasks:
     - name: Install sshpass if not present
-      apt:
+      ansible.builtin.apt:
         name: sshpass
         state: present
 
 - name: Configure static IP on target
   hosts: target
-  gather_facts: no
-  become: yes
+  gather_facts: false
+  become: true
   tasks:
     - name: Replace DHCP config with static config via raw
-      raw: |
+      ansible.builtin.raw: |
         sed -i '/iface {{ interface_name }} inet dhcp/,+3d' /etc/network/interfaces
         echo "auto {{ interface_name }}" >> /etc/network/interfaces
         echo "iface {{ interface_name }} inet static" >> /etc/network/interfaces
@@ -22,3 +23,5 @@
         echo "    netmask {{ netmask }}" >> /etc/network/interfaces
         echo "    gateway {{ gateway }}" >> /etc/network/interfaces
         echo "    dns-nameservers {{ dns1 }} {{ dns2 }}" >> /etc/network/interfaces
+      changed_when: true
+...

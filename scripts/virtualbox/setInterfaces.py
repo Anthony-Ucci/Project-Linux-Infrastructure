@@ -56,18 +56,22 @@ def handle_line(line):
     parts = line.strip().split("|")
     vm_name, lan_name, inet_type, network_range, nic_number = parts
     set_interface(vm_name, lan_name, inet_type, network_range, nic_number)
+    
+def process(config_file_path):
+    with open(config_file_path, "r") as config:
+        start_time = int(time.time())
+        try:
+            for line in config:
+                if not line.strip() or line.startswith('#'):
+                    continue
+                handle_line(line)
+        except Exception as e:
+            print(f"Error while processing the file {config_file_path}: {e}\n")
+        stop_time = int(time.time())
+        run_time = str(datetime.timedelta(seconds=(stop_time - start_time)))
+        print(f"#### Run Time {run_time} ####")
 
 
 #### Main ####
-with open(config_file, "r") as config:
-    start_time = int(time.time())
-    try:
-        for line in config:
-            if not line.strip() or line.startswith('#'):
-                continue
-            handle_line(line)
-    except Exception as e:
-        print(f"Error while processing the file {config_file}: {e}\n")
-    stop_time = int(time.time())
-    run_time = str(datetime.timedelta(seconds=(stop_time - start_time)))
-    print(f"#### Run Time {run_time} ####")
+if __name__ == "__main__":
+    process(config_file)

@@ -56,26 +56,31 @@ def trigger_request(request, line):
     else:
         print("**** Usage: clone|start|shutdown|undefine ****")
         sys.exit(22)
+        
+def process(config_file_path, request):
+    with open(config_file_path, "r") as config:
+        start_time = int(time.time())
+        try:
+            for line in config:
+                if line == "\n" or line.startswith('#'):
+                    continue
+                trigger_request(request, line)
+        except Exception as e:
+            print(f"Error while processing the file {config_file}: {e}\n")
+
+        stop_time = int(time.time())
+        run_time = str(datetime.timedelta(seconds=(stop_time - start_time)))
+        print(f"#### Run Time {run_time} ####")
 
 
-#### Main ####
-try:
-    request = sys.argv[1]
-except IndexError:
-    print("**** Usage: clone|start|shutdown|undefine ****")
-    sys.exit(22)
-
-with open(config_file, "r") as config:
-    start_time = int(time.time())
+if __name__ == "__main__":
     try:
-        for line in config:
-            if line == "\n" or line.startswith('#'):
-                continue
-            trigger_request(request, line)
-    except Exception as e:
-        print(f"Error while processing the file {config_file}: {e}\n")
+        request = sys.argv[1]
+    except IndexError:
+        print("**** Usage: clone|start|shutdown|undefine ****")
+        sys.exit(22)
+    process(config_file, request)
+    
 
-    stop_time = int(time.time())
-    run_time = str(datetime.timedelta(seconds=(stop_time - start_time)))
-    print(f"#### Run Time {run_time} ####")
+
 
