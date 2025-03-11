@@ -1,0 +1,164 @@
+---
+- name: Setting up the vm templates
+  hosts: all
+  become: true
+  tasks:
+
+    # Updating the sources files by changing the protocol (http -> https)
+    - name: (Debian) Modify /etc/apt/sources.list file
+      ansible.builtin.replace:
+        path: /etc/apt/sources.list
+        regexp: 'http://'
+        replace: 'https://'
+        backup: true
+      when: ansible_facts['os_family'] in ["Debian", "Ubuntu"]
+
+    - name: (RedHat) Find all .repo files in /etc/yum.repos.d/
+      ansible.builtin.find:
+        paths: /etc/yum.repos.d/
+        patterns: "*.repo"
+      register: repo_files
+      when: ansible_facts['os_family'] in ["RedHat", "Rocky"]
+
+    - name: (RedHat) Replace 'http://' by 'https://' in all .repo files
+      ansible.builtin.replace:
+        path: "{{ item.path }}"
+        regexp: 'http://'
+        replace: 'https://'
+        backup: true
+      loop: "{{ repo_files.files }}"
+
+
+    # Updating the system
+    - name: (Debian) Upgrade the operating systemd
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        only_upgrade: true
+        update_cache: true
+        force_apt_get: true
+      when: ansible_facts['os_family'] in ["Debian", "Ubuntu"]
+
+    - name: (RedHat) Upgrade the operating systemd
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        update_only: true
+        update_cache: true
+      when: ansible_facts['os_family'] in ["RedHat", "Rocky"]
+
+
+    # Installing packages
+    - name: (Debian) Install necessary packages
+      ansible.builtin.apt:
+        name:
+          - firewalld
+          - python3-firewall
+          - htop
+          - wget
+          - curl
+          - bash-completion
+          - nano
+          - tar
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] in ["Debian", "Ubuntu"]
+
+    - name: (RedHat) Install EPEL repository
+      ansible.builtin.dnf:
+        name:
+          - epel-release
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] in ["RedHat", "Rocky"]
+
+    - name: (RedHat) Install necessary packages
+      ansible.builtin.dnf:
+        name:
+          - firewalld
+          - python3-firewall
+          - htop
+          - wget
+          - curl
+          - bash-completion
+          - nano
+          - tar
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] in ["RedHat", "Rocky"]
+
+
+    # Creating the admin user and making him sudoers
+    - name: (All) Create user tux with password rootroot
+      ansible.builtin.user:
+        name: tux
+        password: "{{ 'rootroot' | password_hash('sha512') }}"
+        shell: /bin/bash
+        state: present
+
+    - name: (All) Allow user tux to sudo without password
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/tux
+        content: "tux ALL=(ALL) NOPASSWD: ALL\n"
+        owner: root
+        group: root
+        mode: '0440'
+
+
+      # Adding SSH keys
+    - name: (All) Add ssh_group
+      ansible.builtin.group:
+        name: "{{ ssh_group }}"
+        state: present
+
+    - name: (All) Add the main user to ssh group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: "{{ ssh_group }}"
+        append: true
+        state: present
+
+    - name: (All) Set authorized_keys for user
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_ed25519.pub') }}"
+
+
+    # Configuring the keyboard layout
+    - name: (RedHat) Configure keyboard layout
+      ansible.builtin.command: localectl set-keymap be
+
+    - name: (Debian) Configure keyboard layout
+      ansible.builtin.replace:
+        path: /etc/default/keyboard
+        regexp: '^XKBLAYOUT=.*'
+        replace: 'XKBLAYOUT="be"'
+      notify: Reload keyboard configuration
+
+
+    # Setting up time zone
+    - name: (All) Configure timezone to Europe/Brussels
+      ansible.builtin.command: timedatectl set-timezone Europe/Brussels
+
+    # Deleting the machineId
+    - name: (All) Delete /etc/machine-id file (if exists)
+      ansible.builtin.file:
+        path: /etc/machine-id
+        state: absent
+
+    - name: (All) Delete /var/lib/dbus/machine-id file (if exists)
+      ansible.builtin.file:
+        path: /var/lib/dbus/machine-id
+        state: absent
+
+    - name: (All) Recreate /etc/machine-id file
+      ansible.builtin.file:
+        path: /etc/machine-id
+        state: touch
+        mode: '0644'
+
+  handlers:
+  - name: Reload keyboard configuration
+    ansible.builtin.command: setupcon
+...

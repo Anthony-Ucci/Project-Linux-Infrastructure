@@ -17,7 +17,7 @@ def stop_virtualbox_processes():
     subprocess.run("sudo pkill -f VBoxSVC", shell=True, stderr=subprocess.DEVNULL)
     subprocess.run("sudo pkill -f VBoxHeadless", shell=True, stderr=subprocess.DEVNULL)
 
-def switch_virtualbox():
+def switch_to_virtualbox():
     """Active VirtualBox et désactive KVM."""
     run("sudo systemctl disable --now libvirtd || true")
     run("sudo modprobe -r kvm_intel 2>/dev/null || sudo modprobe -r kvm_amd 2>/dev/null")
@@ -26,7 +26,7 @@ def switch_virtualbox():
     run("sudo modprobe vboxnetadp")
     print("Switched to VirtualBox mode.")
 
-def switch_kvm():
+def switch_to_kvm():
     """Active KVM et désactive VirtualBox."""
     stop_virtualbox_processes()
     run("sudo modprobe -r vboxnetadp 2>/dev/null || true")  
@@ -51,8 +51,8 @@ if __name__ == "__main__":
 
     provider = sys.argv[1].lower()
     if provider == "virtualbox":
-        switch_virtualbox()
+        switch_to_virtualbox()
     else:
-        switch_kvm()
+        switch_to_kvm()
     
     check_status()  # Affiche l'état après l'exécution
