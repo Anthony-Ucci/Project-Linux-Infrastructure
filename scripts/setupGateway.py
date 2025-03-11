@@ -28,7 +28,7 @@ def run_ansible():
     result = subprocess.run(command, capture_output=True, text=True)
     print(result.stdout)
 
-def main():
+def process():
     ip_addr = get_guest_ip()
     print(f"IP address of {GATEWAY} is {ip_addr}")
     print(f"Adding port forwarding rule for {GATEWAY}...")
@@ -49,4 +49,4 @@ def main():
     subprocess.run(["VBoxManage", "controlvm", GATEWAY, "poweroff"])
 
 if __name__ == '__main__':
-    main()
+    process()
