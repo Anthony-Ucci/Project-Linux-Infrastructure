@@ -2,18 +2,15 @@
 import sys
 import os
 import subprocess
-from scripts import switchHypervisor, checkCommands, manageVms, setInterfaces, setupGateway
+from scripts import switchHypervisor, checkCommands, manageVms, setInterfaces, setupGateway, hypervisor_selector
 
 vms_management_config_file =  "./conf/vbox_manager.conf"
 neti_management_config_file =  "./conf/vbox_net.conf"
 
-def main():
-    # TODO Let the user choose the hypervisor
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <hypervisor>")
-        sys.exit(1)
+def main(): 
+    hypervisor = hypervisor_selector.select_hypervisor()
+    print(f"You have selected: {hypervisor.value}")
     
-    hypervisor = sys.argv[1]
 
     # TODO Make it be handled by a specific service
     print("--- 1 --- Checking prerequisites...")
