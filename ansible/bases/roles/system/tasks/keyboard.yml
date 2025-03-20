@@ -1,0 +1,15 @@
+- name: Keyboard configuration block
+  block:
+    - name: Configure keyboard layout on RedHat-based systems
+      ansible.builtin.command: localectl set-keymap be
+      when: ansible_facts['os_family'] in ["RedHat", "Rocky"]
+      changed_when: false
+
+    - name: Configure keyboard layout on Debian-based systems
+      ansible.builtin.replace:
+        path: /etc/default/keyboard
+        regexp: '^XKBLAYOUT=.*'
+        replace: 'XKBLAYOUT="be"'
+        backup: true
+      when: ansible_facts['os_family'] in ["Debian", "Ubuntu"]
+      notify: "Reload keyboard configuration"

@@ -1,0 +1,9 @@
+---
+- name: Import update tasks
+  ansible.builtin.import_tasks: updates.yml
+
+- name: Import keyboard configuration tasks
+  ansible.builtin.import_tasks: keyboard.yml
+
+- name: Import machine ID tasks
+  ansible.builtin.import_tasks: machine-id.yml

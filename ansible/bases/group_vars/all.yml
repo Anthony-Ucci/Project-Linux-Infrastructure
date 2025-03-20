@@ -1,0 +1,4 @@
+default_user: admin
+default_password: "{{ 'rootroot' | password_hash('sha512') }}"
+default_timezone: "Europe/Brussels"
+ssh_group: ssh_users

@@ -1,0 +1,9 @@
+---
+- name: Add SSH keys for users
+  ansible.posix.authorized_key:
+    user: "{{ item }}"
+    state: present
+    key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_ed25519.pub') }}"
+  loop:
+    - "{{ ansible_user }}"
+    - "{{ default_user }}"

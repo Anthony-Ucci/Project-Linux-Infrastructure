@@ -1,0 +1,15 @@
+---
+- name: Create user {{ default_user }}
+  ansible.builtin.user:
+    name: "{{ default_user }}"
+    password: "{{ default_password }}"
+    shell: /bin/bash
+    state: present
+
+- name: Allow user to sudo without password (user {{ default_user }})
+  ansible.builtin.copy:
+    owner: root
+    group: root
+    mode: '0440'
+    content: "{{ default_user }} ALL=(ALL) NOPASSWD: ALL\n"
+    dest: /etc/sudoers.d/{{ default_user }}

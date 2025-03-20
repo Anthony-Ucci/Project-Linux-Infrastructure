@@ -1,0 +1,14 @@
+---
+- name: Install necessary packages for Debian
+  ansible.builtin.apt:
+    name:
+      - firewalld
+      - python3-firewall
+      - htop
+      - wget
+      - curl
+      - bash-completion
+      - nano
+      - tar
+    state: present
+    update_cache: true

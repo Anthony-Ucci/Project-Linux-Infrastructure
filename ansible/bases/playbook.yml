@@ -1,0 +1,14 @@
+---
+- name: Setting up the VM templates
+  hosts: all
+  become: true
+
+  roles:
+    - common
+    - packages
+    - system
+
+  handlers:
+    - name: Reload keyboard configuration
+      ansible.builtin.command: setupcon
+      changed_when: false

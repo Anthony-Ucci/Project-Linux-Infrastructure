@@ -1,0 +1,3 @@
+---
+- name: Install OS-specific packages
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"

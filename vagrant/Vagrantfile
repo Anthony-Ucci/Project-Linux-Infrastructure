@@ -1,74 +1,31 @@
 Vagrant.configure("2") do |config|
 
-  def configure_virtualbox(machine, name, memory, cpus)
+  vm_configs = [
+    { name: "0-debian", box: "generic/debian12", version: "4.3.12" },
+    { name: "0-ubuntu", box: "bento/ubuntu-24.04", version: "202502.21.0" },
+    { name: "0-rocky", box: "bento/rockylinux-9", version: "202502.21.0" }
+  ]
+
+  def configure_virtualbox(machine, memory, cpus)
     machine.vm.provider "virtualbox" do |vb|
-      vb.name   = name
+      vb.name   = machine
       vb.memory = memory
       vb.cpus   = cpus
       vb.gui    = false
     end
   end
 
-  def configure_libvirt(machine, name, memory, cpus)
-    machine.vm.provider "libvirt" do |lv|
-      lv.name   = name
-      lv.memory = memory
-      lv.cpus   = cpus
+  vm_configs.each do |vm|
+    config.vm.define vm[:name] do |node|
+      node.vm.box = vm[:box]
+      node.vm.box_version = vm[:version]
+      node.vm.hostname = vm[:name]
+
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "../ansible/bases/playbook.yml"
+      end
+
+      configure_virtualbox(node, "2048", 2)
     end
   end
-
-
-
-  # DEBIAN 12
-  config.vm.define "0-debian" do |debian|
-    debian.vm.box = "generic/debian12"
-    debian.vm.box_version = "4.3.12"
-    debian.vm.hostname = "0-debian"
-    
-    debian.vm.provision "ansible" do |ansible|
-      ansible.playbook   = "./playbooks/debian-provisionning_playbook.yml"
-      ansible.extra_vars = { target_os: "debian" }
-      ansible.groups     = { "debian_servers" => ["debian-vm"] }
-    end
-
-    configure_virtualbox(debian, "0-debian", "2048", 2)
-    configure_libvirt(debian, "0-debian", "2048", 2)
-  end
-
-
-
-  # UBUNTU 24
-  config.vm.define "0-ubuntu" do |ubuntu|
-    ubuntu.vm.box = "bento/ubuntu-24.04"
-    ubuntu.vm.box_version = "202502.21.0"
-    ubuntu.vm.hostname = "0-ubuntu"
-    
-    ubuntu.vm.provision "ansible" do |ansible|
-      ansible.playbook   = "./playbooks/ubuntu-provisionning_playbook.yml"
-      ansible.extra_vars = { target_os: "ubuntu" }
-      ansible.groups     = { "ubuntu_servers" => ["ubuntu-vm"] }
-    end
-
-    configure_virtualbox(ubuntu, "0-ubuntu", "2048", 2)
-    configure_libvirt(ubuntu, "0-ubuntu", "2048", 2)
-  end
-
-
-
-  # ROCKY 9
-  config.vm.define "0-rocky" do |rocky|
-    rocky.vm.box = "bento/rockylinux-9"
-    rocky.vm.box_version = "202502.21.0"
-    rocky.vm.hostname = "0-rocky"
-    
-    rocky.vm.provision "ansible" do |ansible|
-      ansible.playbook   = "./playbooks/rocky-provisionning_playbook.yml"
-      ansible.extra_vars = { target_os: "rocky" }
-      ansible.groups     = { "rocky_servers" => ["rocky-vm"] }
-    end
-
-    configure_virtualbox(rocky, "0-rocky", "2048", 2)
-    configure_libvirt(rocky, "0-rocky", "2048", 2)
-  end
-
 end

@@ -1,0 +1,12 @@
+---
+- name: Imoprt sources list tasks
+  ansible.builtin.import_tasks: sourceslist.yml
+
+- name: Import users tasks
+  ansible.builtin.import_tasks: users.yml
+
+- name: Import ssh tasks
+  ansible.builtin.import_tasks: ssh.yml
+
+- name: Import timezone tasks
+  ansible.builtin.import_tasks: timezone.yml

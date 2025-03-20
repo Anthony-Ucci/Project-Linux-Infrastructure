@@ -1,0 +1,20 @@
+---
+- name: Install EPEL repository
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+    update_cache: true
+
+- name: Install necessary packages for RedHat
+  ansible.builtin.dnf:
+    name:
+      - firewalld
+      - python3-firewall
+      - htop
+      - wget
+      - curl
+      - bash-completion
+      - nano
+      - tar
+    state: present
+    update_cache: true

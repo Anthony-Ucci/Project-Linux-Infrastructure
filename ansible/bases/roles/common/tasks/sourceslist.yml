@@ -1,0 +1,24 @@
+---
+- name: (Debian) Modify /etc/apt/sources.list file
+  ansible.builtin.replace:
+    path: /etc/apt/sources.list
+    regexp: 'http://'
+    replace: 'https://'
+    backup: true
+  when: ansible_facts['os_family'] in ["Debian", "Ubuntu"]
+
+- name: (RedHat) Find all .repo files in /etc/yum.repos.d/
+  ansible.builtin.find:
+    paths: /etc/yum.repos.d/
+    patterns: "*.repo"
+  register: repo_files
+  when: ansible_facts['os_family'] in ["RedHat", "Rocky"]
+
+- name: (RedHat) Replace 'http://' by 'https://' in all .repo files
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: 'http://'
+    replace: 'https://'
+    backup: true
+  loop: "{{ repo_files.files }}"
+  when: ansible_facts['os_family'] in ["RedHat", "Rocky"]

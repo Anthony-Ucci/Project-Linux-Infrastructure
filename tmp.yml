@@ -88,6 +88,7 @@
       when: ansible_facts['os_family'] in ["RedHat", "Rocky"]
 
 
+
     # Creating the admin user and making him sudoers
     - name: (All) Create user tux with password rootroot
       ansible.builtin.user:

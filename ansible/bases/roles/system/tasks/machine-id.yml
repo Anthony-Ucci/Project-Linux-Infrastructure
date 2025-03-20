@@ -1,0 +1,16 @@
+---
+- name: Delete /etc/machine-id file (if exists)
+  ansible.builtin.file:
+    path: /etc/machine-id
+    state: absent
+
+- name: Delete /var/lib/dbus/machine-id file (if exists)
+  ansible.builtin.file:
+    path: /var/lib/dbus/machine-id
+    state: absent
+
+- name: Recreate /etc/machine-id file
+  ansible.builtin.file:
+    path: /etc/machine-id
+    state: touch
+    mode: '0644'
