@@ -1,60 +1,42 @@
 #!/usr/bin/env python3
+from pathlib import Path
 import sys
-import os
-import subprocess
-from scripts import switchHypervisor, checkCommands, manageVms, setInterfaces, setupGateway, hypervisor_selector
+from scripts import checkCommands, setInterfaces, setupGateway
+from scripts.vboxManager import VBoxManager
+from vagrant.vagrantManager import VagrantManager
 
-vms_management_config_file =  "./conf/vbox_manager.conf"
-neti_management_config_file =  "./conf/vbox_net.conf"
+
+VBOX_MGMT_CONF =  "./conf/vbox_manager.conf"
+NETI_MGMT_CONF =  "./conf/vbox_net.conf"
+VBOX_DIR = f"{Path.home()}/Documents/formation/VirtualBox" 
+VAGRANT_DIR = "./vagrant/"
+
+PROGRAM_DEPENDENCIES = ["VBoxManage", "vagrant", "ansible"]
+
 
 def main(): 
-    hypervisor = hypervisor_selector.select_hypervisor()
-    print(f"You have selected: {hypervisor.value}")
-    
-
-    # TODO Make it be handled by a specific service
     print("--- 1 --- Checking prerequisites...")
-    if not checkCommands.check("vagrant"):
-        sys.stderr.write("Vagrant is not installed. Exiting.\n")
-        sys.exit(1)
-    if not checkCommands.check("ansible-playbook"):
-        sys.stderr.write("Ansible is not installed. Exiting.\n")
-        sys.exit(1)
+    for dep in PROGRAM_DEPENDENCIES:
+        try:
+            checkCommands.check(dep)
+        except Exception as e:
+            sys.exit(1)
     print("Dependencies OK.")
 
+    print("--- 2 --- Creating VMs (Vagrant + Ansible)...")
+    vagrant = VagrantManager(vagrant_dir=VAGRANT_DIR)
+    vagrant.up()
+    vagrant.halt()
 
-    print("--- 2 --- Switching hypervisor provider...")
-    # TODO Make it be handled by a specific service
-    if hypervisor == "virtualbox":
-        switchHypervisor.switch_to_virtualbox()
-    #elif hypervisor == "libvirt":
-        #switchHypervisor.switch_to_libvirt()
-    else:
-        print(f"Invalid hypervisor: {hypervisor}")
-        sys.exit(1)
+    print("--- 3 --- Setting up VMs (Cloning)...")
+    manager = VBoxManager(VBOX_MGMT_CONF, VBOX_DIR)
+    manager.process("clone")
 
+    # print("--- 5 --- Setting network interfaces on VMs...")
+    # setInterfaces.process(NETI_MGMT_CONF)
 
-    print("--- 3 --- Creating VMs (Vagrant + Ansible)...")
-    # TODO Make it be handled by a specific service (Vagrant service object)
-    vagrant_dir = os.path.join(os.getcwd(), "vagrant")
-    subprocess.run(["vagrant", "up", "--provider", hypervisor], cwd=vagrant_dir, check=True)
-    subprocess.run(["vagrant", "halt"], cwd=vagrant_dir, check=True)
-
-
-    print("--- 4 --- Setting up VMs (Cloning)...")
-    # TODO Make it be handled by a specific service (service object)
-    manageVms.process(vms_management_config_file, "clone")
-    manageVms.process(vms_management_config_file, "shutdown")
-
-
-    print("--- 5 --- Setting network interfaces on VMs...")
-    # TODO Make it be handled by a specific service (service object)
-    setInterfaces.process(neti_management_config_file)
-
-
-    print("--- 6 --- Configuring the gateway...")
-    # TODO Work with configuration files
-    setupGateway.process()
+    # print("--- 6 --- Configuring the gateway...")
+    # setupGateway.process()
 
     print("All tasks completed successfully.")
 

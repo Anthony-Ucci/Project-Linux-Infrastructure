@@ -1,10 +1,8 @@
-import subprocess
+import shutil
 
-
-def check(cmd):
-    """Check if a command is available in the system."""
-    try:
-        subprocess.run([cmd, '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-        return True
-    except Exception:
-        return False
+def check(dependency):
+  if shutil.which(dependency):
+      print(f"{dependency} is installed.")
+      return True
+  else:
+      raise Exception(f"{dependency} is not installed.")
