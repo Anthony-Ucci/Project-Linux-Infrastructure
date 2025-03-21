@@ -32,8 +32,8 @@ def main():
     manager = VBoxManager(VBOX_MGMT_CONF, VBOX_DIR)
     manager.process("clone")
 
-    # print("--- 5 --- Setting network interfaces on VMs...")
-    # setInterfaces.process(NETI_MGMT_CONF)
+    print("--- 4 --- Setting network interfaces on VMs...")
+    setInterfaces.process(NETI_MGMT_CONF)
 
     # print("--- 6 --- Configuring the gateway...")
     # setupGateway.process()
